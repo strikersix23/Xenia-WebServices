@@ -582,24 +582,16 @@ export class SessionController {
     @Param('sessionId') sessionId: string,
     @Req() req: RawBodyRequest<Request>,
   ) {
-    const session: Session = await this.queryBus.execute(
-      new GetSessionQuery(new TitleId(titleId), new SessionId(sessionId)),
-    );
-
-    if (!session) {
-      const error_msg = `Session ${sessionId} was not found.`;
-      this.logger.error(error_msg);
-
-      throw new NotFoundException(error_msg);
-    }
+    // Systemlink session documents aren't stored on the backend.
+    const session_id: SessionId = new SessionId(sessionId);
 
     const qosPath = join(process.cwd(), 'qos', titleId, sessionId);
 
     if (existsSync(qosPath)) {
-      this.logger.verbose('Updating QoS Data.');
+      this.logger.verbose(`${session_id.GetTypeString()}: Updating QoS Data.`);
     } else {
       await mkdir(join(process.cwd(), 'qos', titleId), { recursive: true });
-      this.logger.verbose('Saving QoS Data.');
+      this.logger.verbose(`${session_id.GetTypeString()}: Saving QoS Data.`);
     }
 
     // always write QoS data to ensure data is updated.
