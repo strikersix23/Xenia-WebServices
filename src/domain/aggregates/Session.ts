@@ -409,21 +409,27 @@ export default class Session {
   }
 
   get getHostXUID(): Xuid {
+    let XUID: Xuid = undefined;
+
     if (this.HasProperties()) {
       const PUID = this.propertyPUID;
 
       if (PUID) {
         if (PUID.getData().byteLength == 8) {
-          return new Xuid(
+          XUID = new Xuid(
             PUID.getData().readBigUInt64BE().toString(16).padStart(16, '0'),
           );
         } else {
           this._logger.error('Corrupt PUID!');
         }
       }
-    } else {
-      return this?.xuid;
     }
+
+    if (!XUID) {
+      XUID = this?.xuid;
+    }
+
+    return XUID;
   }
 
   HasProperties() {
